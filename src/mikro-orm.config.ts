@@ -9,6 +9,7 @@ export default {
         pattern: /^[\w-]+\d+\.[tj]s$/,
     },
     entities: [Post],
+    allowGlobalContext: true,
     dbName: "reddit-clone",
     user: "postgres",
     password: "Admin123",
