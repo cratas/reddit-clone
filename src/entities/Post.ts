@@ -9,7 +9,7 @@ export class Post {
     @Property()
     createdAt = new Date();
 
-    @PrimaryKey({onUpdate: () => new Date()})
+    @Property({onUpdate: () => new Date()})
     updatedAt = new Date();
 
     @Property()
