@@ -12,6 +12,10 @@ import { UserResolver } from "./resolvers/user";
 // constants
 import { __prod__ } from "./constants";
 
+import * as redis from 'redis';
+import session from 'express-session';
+import connectRedis from 'connect-redis';
+import { MyContext } from "./types";
 
 const main = async () => {
   const orm = await MikroORM.init(microConfig);
@@ -22,13 +26,37 @@ const main = async () => {
 
   const app = express();
 
+  let redisStore = connectRedis(session);
+  let redisClient = redis.createClient();
+
+  redisClient.connect().catch(console.error);
+
+  app.use(
+    session({
+      name: "qid",
+      store: new redisStore({
+        client: redisClient as any,
+        disableTouch: true,
+      }),
+      cookie: {
+        maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years
+        httpOnly: true,
+        secure: __prod__, // cokie only works in https
+        sameSite: 'lax',  //csrf
+      },
+      saveUninitialized: false,
+      secret: "sdfasdfqqfqfqfqwfqsdf",
+      resave: false,
+    })
+  );
+
   // creating apollo graphQL server
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-    context: () => ({ em: orm.em }),  // passing objects, something like props
+    context: ({req, res}): MyContext => ({ em: orm.em, req, res }), // passing objects, something like props
   });
 
   // startin' graphQL server

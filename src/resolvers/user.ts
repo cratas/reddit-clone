@@ -99,7 +99,7 @@ export class UserResolver {
   @Mutation(() => UserResponse)
   async login(
     @Arg("options") options: UserNamePasswordInput, // options passed as objects created on top
-    @Ctx() { em }: MyContext
+    @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
     const user = await em.findOneOrFail(User, { userName: options.username });
     // if user does not exist return correct error object
@@ -128,12 +128,13 @@ export class UserResolver {
       };
     }
 
+    req.session.userId = user.id;
+
     // if everything is ok, return user
     return {
       user,
     };
   }
-
 
   
 }
