@@ -11,6 +11,7 @@ import {
   Resolver,
 } from "type-graphql";
 import argon2 from "argon2";
+// import { EntityManager } from "@mikro-orm/postgresql";
 
 @InputType()
 class UserNamePasswordInput {
@@ -90,6 +91,7 @@ export class UserResolver {
       createdAt: new Date(),
       updatedAt: new Date(),
     });
+
     try {
       await em.persistAndFlush(user);
     } catch (err) {
@@ -118,7 +120,14 @@ export class UserResolver {
     @Arg("options") options: UserNamePasswordInput, // options passed as objects created on top
     @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
-    const user = await em.findOneOrFail(User, { userName: options.username });
+
+    let user;
+    try{
+      user = await em.findOneOrFail(User, { userName: options.username });
+    } catch(err) {
+      console.log(err);
+    }
+
     // if user does not exist return correct error object
     if (!user) {
       return {

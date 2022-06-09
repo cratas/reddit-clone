@@ -127,7 +127,13 @@ let UserResolver = class UserResolver {
     }
     login(options, { em, req }) {
         return __awaiter(this, void 0, void 0, function* () {
-            const user = yield em.findOneOrFail(User_1.User, { userName: options.username });
+            let user;
+            try {
+                user = yield em.findOneOrFail(User_1.User, { userName: options.username });
+            }
+            catch (err) {
+                console.log(err);
+            }
             if (!user) {
                 return {
                     errors: [
