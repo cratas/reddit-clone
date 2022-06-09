@@ -41,6 +41,7 @@ const mikro_orm_config_1 = __importDefault(require("./mikro-orm.config"));
 const express_1 = __importDefault(require("express"));
 const apollo_server_express_1 = require("apollo-server-express");
 const type_graphql_1 = require("type-graphql");
+const cors_1 = __importDefault(require("cors"));
 const hello_1 = require("./resolvers/hello");
 const post_1 = require("./resolvers/post");
 const user_1 = require("./resolvers/user");
@@ -54,6 +55,10 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
     const app = (0, express_1.default)();
     let redisStore = (0, connect_redis_1.default)(express_session_1.default);
     let redisClient = redis.createClient({ legacyMode: true });
+    app.use((0, cors_1.default)({
+        origin: "http://localhost:3000",
+        credentials: true,
+    }));
     redisClient.connect().catch(console.error);
     app.use((0, express_session_1.default)({
         name: "qid",
@@ -79,7 +84,10 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
         context: ({ req, res }) => ({ em: orm.em, req, res }),
     });
     yield apolloServer.start();
-    apolloServer.applyMiddleware({ app });
+    apolloServer.applyMiddleware({
+        app,
+        cors: false,
+    });
     app.listen(4000, () => {
         console.log("server started on localhost:4000");
     });

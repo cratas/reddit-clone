@@ -72,11 +72,11 @@ export class UserResolver {
     }
 
     //checking if password has correct format
-    if (options.username.length < 5) {
+    if (options.password.length < 5) {
       return {
         errors: [
           {
-            field: "username",
+            field: "password",
             message: "Length of password must be greated than 4.",
           },
         ],

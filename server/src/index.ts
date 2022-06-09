@@ -4,6 +4,7 @@ import microConfig from "./mikro-orm.config";
 import express from "express";
 import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
+import cors from "cors";
 
 // graphQL resolvers
 import { HelloResolver } from "./resolvers/hello";
@@ -28,6 +29,13 @@ const main = async () => {
 
   let redisStore = connectRedis(session);
   let redisClient = redis.createClient({ legacyMode: true });
+
+  app.use(
+    cors({
+      origin: "http://localhost:3000",
+      credentials: true,
+    })
+  );
 
   redisClient.connect().catch(console.error);
 
@@ -61,7 +69,10 @@ const main = async () => {
 
   // startin' graphQL server
   await apolloServer.start();
-  apolloServer.applyMiddleware({ app });
+  apolloServer.applyMiddleware({
+    app,
+    cors: false,
+  });
 
   // startin server on port 4000
   app.listen(4000, () => {
