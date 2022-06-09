@@ -53,7 +53,7 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
     yield orm.getMigrator().up();
     const app = (0, express_1.default)();
     let redisStore = (0, connect_redis_1.default)(express_session_1.default);
-    let redisClient = redis.createClient();
+    let redisClient = redis.createClient({ legacyMode: true });
     redisClient.connect().catch(console.error);
     app.use((0, express_session_1.default)({
         name: "qid",
@@ -65,7 +65,7 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
             maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
             httpOnly: true,
             secure: constants_1.__prod__,
-            sameSite: 'lax',
+            sameSite: "lax",
         },
         saveUninitialized: false,
         secret: "sdfasdfqqfqfqfqwfqsdf",
