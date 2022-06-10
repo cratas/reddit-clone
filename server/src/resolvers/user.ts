@@ -11,6 +11,7 @@ import {
   Resolver,
 } from "type-graphql";
 import argon2 from "argon2";
+import { COOKIE_NAME } from "../constants"
 // import { EntityManager } from "@mikro-orm/postgresql";
 
 @InputType()
@@ -120,11 +121,10 @@ export class UserResolver {
     @Arg("options") options: UserNamePasswordInput, // options passed as objects created on top
     @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
-
     let user;
-    try{
+    try {
       user = await em.findOneOrFail(User, { userName: options.username });
-    } catch(err) {
+    } catch (err) {
       console.log(err);
     }
 
@@ -159,5 +159,21 @@ export class UserResolver {
     return {
       user,
     };
+  }
+
+  @Mutation(() => Boolean)
+  logout(@Ctx() { req, res }: MyContext) {
+    return new Promise((resolve) =>
+      req.session.destroy((err) => {
+        res.clearCookie(COOKIE_NAME);
+        if (err) {
+          console.log(err);
+          resolve(false);
+          return;
+        }
+
+        resolve(true);
+      })
+    );
   }
 }
