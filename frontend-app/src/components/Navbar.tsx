@@ -3,6 +3,7 @@ import { CSSObject } from "@emotion/react";
 import React from "react";
 import NextLink from "next/link";
 import { useLogoutMutation, useMeQuery } from "../generated/graphql";
+import { isServer } from "../utils/isServer";
 
 interface NavbarProps {}
 
@@ -12,8 +13,12 @@ const style: CSSObject = {
 };
 
 export const Navbar: React.FC<NavbarProps> = ({}) => {
-  const [{ data, fetching }] = useMeQuery();
   const [{fetching: fetchingLogout}, logout] = useLogoutMutation();
+  const [{ data, fetching }] = useMeQuery({
+    pause: isServer()
+  });
+
+  
   let body = null;
 
   if (!data?.me) {
