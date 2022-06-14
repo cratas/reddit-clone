@@ -14,24 +14,36 @@ export const validateRegister = (options: UserNamePasswordInput) => {
   }
 
   //checking if password has correct format
-  if (options.password.length < 5) {
+  if (options.username.includes("@")) {
     return {
       errors: [
         {
-          field: "password",
-          message: "Length of password must be greated than 4.",
+          field: "username",
+          message: "Cnnot include an @.",
         },
       ],
     };
   }
 
   //checking if email has correct format
-  if (options.email.includes("@")) {
+  if (!options.email.includes("@")) {
     return {
       errors: [
         {
           field: "email",
           message: "Invalid email.",
+        },
+      ],
+    };
+  }
+
+  //checking if password has correct format
+  if (options.password.length < 5) {
+    return {
+      errors: [
+        {
+          field: "password",
+          message: "Length of password must be greated than 4.",
         },
       ],
     };

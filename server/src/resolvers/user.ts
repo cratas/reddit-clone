@@ -11,7 +11,8 @@ import {
 } from "type-graphql";
 import argon2 from "argon2";
 import { COOKIE_NAME } from "../constants";
-import { UserNamePasswordInput } from "./UserNamePasswordInput";
+import { UserNamePasswordInput } from "../utils/UserNamePasswordInput";
+import { validateRegister } from "../utils/validateRegister";
 
 // object for abstract error type
 @ObjectType()
@@ -34,11 +35,11 @@ class UserResponse {
 
 @Resolver() // resolver keyword
 export class UserResolver {
-  @Mutation(() => Boolean)
-  async forgotPassword(@Arg("email") email: string, @Ctx() { em }: MyContext) {
-    // const person  = await em.findOne(User, {email});
-    return true;
-  }
+  // @Mutation(() => Boolean)
+  // async forgotPassword(@Arg("email") email: string, @Ctx() { em }: MyContext) {
+  //   // const person  = await em.findOne(User, {email});
+  //   return true;
+  // }
 
   @Query(() => User, { nullable: true })
   async me(@Ctx() { req, em }: MyContext) {
@@ -57,6 +58,12 @@ export class UserResolver {
     @Arg("options") options: UserNamePasswordInput, // options passed as objects created on top
     @Ctx() { req, em }: MyContext
   ): Promise<UserResponse> {
+    // validation of input
+    const response = validateRegister(options);
+    if (response) {
+      return response;
+    }
+
     const hashedPassword = await argon2.hash(options.password); // creating new hash key by argon2 hashing alg
     const user = em.create(User, {
       userName: options.username,
@@ -112,8 +119,8 @@ export class UserResolver {
       return {
         errors: [
           {
-            field: "username",
-            message: "could not find the user",
+            field: "usernameOrEmail",
+            message: "This username/email does not exist.",
           },
         ],
       };

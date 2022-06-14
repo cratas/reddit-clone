@@ -18,7 +18,7 @@ const Login: React.FC<{}> = () => {
   return (
     <Wrapper>
       <Formik
-        initialValues={{ username: "", password: "" }}
+        initialValues={{ usernameOrEmail: "", password: "" }}
         onSubmit={async (values, { setErrors }) => {
           const response = await login(values); // passing object with username and password into graphql mutation
 
@@ -35,9 +35,9 @@ const Login: React.FC<{}> = () => {
           <Form>
             <Box mt={3}>
               <InputField
-                name="username"
-                placeholder="username"
-                label="Username"
+                name="usernameOrEmail"
+                placeholder="username or email"
+                label="Username or Email"
               />
             </Box>
             <Box mt={3} mb={5}>
