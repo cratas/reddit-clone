@@ -4,23 +4,14 @@ import {
   Arg,
   Ctx,
   Field,
-  InputType,
   Mutation,
   ObjectType,
   Query,
   Resolver,
 } from "type-graphql";
 import argon2 from "argon2";
-import { COOKIE_NAME } from "../constants"
-// import { EntityManager } from "@mikro-orm/postgresql";
-
-@InputType()
-class UserNamePasswordInput {
-  @Field()
-  username: string;
-  @Field()
-  password: string;
-}
+import { COOKIE_NAME } from "../constants";
+import { UserNamePasswordInput } from "./UserNamePasswordInput";
 
 // object for abstract error type
 @ObjectType()
@@ -41,9 +32,14 @@ class UserResponse {
   user?: User;
 }
 
-// register function
 @Resolver() // resolver keyword
 export class UserResolver {
+  @Mutation(() => Boolean)
+  async forgotPassword(@Arg("email") email: string, @Ctx() { em }: MyContext) {
+    // const person  = await em.findOne(User, {email});
+    return true;
+  }
+
   @Query(() => User, { nullable: true })
   async me(@Ctx() { req, em }: MyContext) {
     // check if user is logged in
@@ -61,34 +57,11 @@ export class UserResolver {
     @Arg("options") options: UserNamePasswordInput, // options passed as objects created on top
     @Ctx() { req, em }: MyContext
   ): Promise<UserResponse> {
-    // checking if username has correct format
-    if (options.username.length < 5) {
-      return {
-        errors: [
-          {
-            field: "username",
-            message: "Length of username must be greated than 4.",
-          },
-        ],
-      };
-    }
-
-    //checking if password has correct format
-    if (options.password.length < 5) {
-      return {
-        errors: [
-          {
-            field: "password",
-            message: "Length of password must be greated than 4.",
-          },
-        ],
-      };
-    }
-
     const hashedPassword = await argon2.hash(options.password); // creating new hash key by argon2 hashing alg
     const user = em.create(User, {
       userName: options.username,
       password: hashedPassword,
+      email: options.email,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -118,12 +91,18 @@ export class UserResolver {
   // login function
   @Mutation(() => UserResponse)
   async login(
-    @Arg("options") options: UserNamePasswordInput, // options passed as objects created on top
+    @Arg("usernameOrEmail") usernameOrEmail: string, // options passed as objects created on top
+    @Arg("password") password: string, // options passed as objects created on top
     @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
     let user;
     try {
-      user = await em.findOneOrFail(User, { userName: options.username });
+      user = await em.findOneOrFail(
+        User,
+        usernameOrEmail.includes("@")
+          ? { email: usernameOrEmail }
+          : { userName: usernameOrEmail }
+      );
     } catch (err) {
       console.log(err);
     }
@@ -141,7 +120,7 @@ export class UserResolver {
     }
 
     // verify hashed password
-    const valid: boolean = await argon2.verify(user.password, options.password);
+    const valid: boolean = await argon2.verify(user.password, password);
     // if pass is not valid, returns object error object
     if (!valid) {
       return {
