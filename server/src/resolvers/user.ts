@@ -10,9 +10,11 @@ import {
   Resolver,
 } from "type-graphql";
 import argon2 from "argon2";
-import { COOKIE_NAME } from "../constants";
+import { COOKIE_NAME, FORGET_PASSWORD_PREFIX } from "../constants";
 import { UserNamePasswordInput } from "../utils/UserNamePasswordInput";
 import { validateRegister } from "../utils/validateRegister";
+import { sendEmail } from "../utils/sendEmail";
+import { v4 } from "uuid";
 
 // object for abstract error type
 @ObjectType()
@@ -35,11 +37,34 @@ class UserResponse {
 
 @Resolver() // resolver keyword
 export class UserResolver {
-  // @Mutation(() => Boolean)
-  // async forgotPassword(@Arg("email") email: string, @Ctx() { em }: MyContext) {
-  //   // const person  = await em.findOne(User, {email});
-  //   return true;
-  // }
+  @Mutation(() => Boolean)
+  async forgotPassword(
+    @Arg("email") email: string,
+    @Ctx() { em, redis }: MyContext
+  ) {
+    const user = await em.findOne(User, { email });
+    if (!user) {
+      // the email is not in database
+      return true;
+    }
+
+    // generate random token
+    const token = v4();
+
+    await redis.set(
+      FORGET_PASSWORD_PREFIX + token,
+      user.id,
+      "EX",
+      1000 * 60 * 60 * 24 * 3
+    ); // 3 days
+
+    await sendEmail(
+      email,
+      `<a href="http://localhost:3000/change-password/${token}">reset password</a>`
+    );
+
+    return true;
+  }
 
   @Query(() => User, { nullable: true })
   async me(@Ctx() { req, em }: MyContext) {

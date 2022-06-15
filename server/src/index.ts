@@ -13,7 +13,7 @@ import { UserResolver } from "./resolvers/user";
 // constants
 import { COOKIE_NAME, __prod__ } from "./constants";
 
-import * as redis from "redis";
+import Redis from "ioredis";
 import session from "express-session";
 import connectRedis from "connect-redis";
 import { MyContext } from "./types";
@@ -28,7 +28,7 @@ const main = async () => {
   const app = express();
 
   let redisStore = connectRedis(session);
-  let redisClient = redis.createClient({ legacyMode: true });
+  var redis = new Redis();
 
   app.use(
     cors({
@@ -37,13 +37,13 @@ const main = async () => {
     })
   );
 
-  redisClient.connect().catch(console.error);
+  redis.connect().catch(console.error);
 
   app.use(
     session({
       name: COOKIE_NAME,
       store: new redisStore({
-        client: redisClient as any,
+        client: redis as any,
         disableTouch: true,
       }),
       cookie: {
@@ -64,7 +64,7 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-    context: ({ req, res }): MyContext => ({ em: orm.em, req, res }), // passing objects, something like props
+    context: ({ req, res }): MyContext => ({ em: orm.em, req, res, redis }), // passing objects, something like props
   });
 
   // startin' graphQL server

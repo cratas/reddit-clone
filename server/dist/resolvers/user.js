@@ -31,6 +31,7 @@ const argon2_1 = __importDefault(require("argon2"));
 const constants_1 = require("../constants");
 const UserNamePasswordInput_1 = require("../utils/UserNamePasswordInput");
 const validateRegister_1 = require("../utils/validateRegister");
+const sendEmail_1 = require("../utils/sendEmail");
 let FieldError = class FieldError {
 };
 __decorate([
@@ -58,6 +59,17 @@ UserResponse = __decorate([
     (0, type_graphql_1.ObjectType)()
 ], UserResponse);
 let UserResolver = class UserResolver {
+    forgotPassword(email, { em }) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const user = yield em.findOne(User_1.User, { email });
+            if (!user) {
+                return true;
+            }
+            const token = 'jaskldfjasdklj123123';
+            yield (0, sendEmail_1.sendEmail)(email, `<a href="http://localhost:3000/change-password/${token}">reset password</a>`);
+            return true;
+        });
+    }
     me({ req, em }) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!req.session.userId) {
@@ -116,7 +128,7 @@ let UserResolver = class UserResolver {
                     errors: [
                         {
                             field: "usernameOrEmail",
-                            message: "could not find the user",
+                            message: "This username/email does not exist.",
                         },
                     ],
                 };
@@ -150,6 +162,14 @@ let UserResolver = class UserResolver {
         }));
     }
 };
+__decorate([
+    (0, type_graphql_1.Mutation)(() => Boolean),
+    __param(0, (0, type_graphql_1.Arg)("email")),
+    __param(1, (0, type_graphql_1.Ctx)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], UserResolver.prototype, "forgotPassword", null);
 __decorate([
     (0, type_graphql_1.Query)(() => User_1.User, { nullable: true }),
     __param(0, (0, type_graphql_1.Ctx)()),
