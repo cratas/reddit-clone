@@ -15,7 +15,7 @@ const style: CSSObject = {
 export const Navbar: React.FC<NavbarProps> = ({}) => {
   const [{fetching: fetchingLogout}, logout] = useLogoutMutation();
   const [{ data, fetching }] = useMeQuery({
-    pause: isServer()
+    pause: isServer() // for this component we use server side rendering, but this query shouldn't be executed on server
   });
 
   

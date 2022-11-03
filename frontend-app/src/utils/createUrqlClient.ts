@@ -9,8 +9,7 @@ import {
 } from "../generated/graphql";
 import { betterUpdateQuery } from "./betterUpdateQuery";
 
-
-export const createUrqlClient = (ssrExchange: any) =>
+export const createUrqlClient = (ssrExchange: any) => 
   ({
     url: "http://localhost:4000/graphql",
     fetchOptions: {
