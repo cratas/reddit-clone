@@ -1,5 +1,5 @@
 import { dedupExchange, fetchExchange } from "urql";
-import { cacheExchange, Cache, QueryInput } from "@urql/exchange-graphcache";
+import { cacheExchange } from "@urql/exchange-graphcache";
 import {
   MeDocument,
   LoginMutation,
@@ -7,15 +7,7 @@ import {
   RegisterMutation,
   LogoutMutation,
 } from "../generated/graphql";
-
-function betterUpdateQuery<Result, Query>(
-  cache: Cache,
-  qi: QueryInput,
-  result: any,
-  fn: (r: Result, q: Query) => Query
-) {
-  return cache.updateQuery(qi, (data) => fn(result, data as any) as any);
-}
+import { betterUpdateQuery } from "./betterUpdateQuery";
 
 export const createUrqlClient = (ssrExchange: any) =>
   ({
@@ -26,6 +18,8 @@ export const createUrqlClient = (ssrExchange: any) =>
     exchanges: [
       dedupExchange,
       cacheExchange({
+        // operations which will update cash memory
+        // for example: If user log out, u wanna recall me query, to rerender ui
         updates: {
           Mutation: {
             logout: (_result, args, cache, info) => {

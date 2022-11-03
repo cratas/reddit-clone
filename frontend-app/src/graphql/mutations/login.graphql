@@ -1,3 +1,4 @@
+# gotta yarn gen for generating code into generated/graphql.tsx
 mutation Login($usernameOrEmail: String!, $password: String!) {
   login(usernameOrEmail: $usernameOrEmail, password: $password) {
     errors {

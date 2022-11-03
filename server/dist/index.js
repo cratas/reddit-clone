@@ -31,7 +31,7 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
     yield orm.getMigrator().up();
     const app = (0, express_1.default)();
     let redisStore = (0, connect_redis_1.default)(express_session_1.default);
-    var redis = ioredis_1.default.createClient();
+    var redis = new ioredis_1.default();
     app.use((0, cors_1.default)({
         origin: "http://localhost:3000",
         credentials: true,
