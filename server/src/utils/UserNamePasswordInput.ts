@@ -5,7 +5,7 @@ import {
 
 // import { EntityManager } from "@mikro-orm/postgresql";
 @InputType()
-export class UserNamePasswordInput {
+export class UsernamePasswordInput {
   @Field()
   username: string;
   @Field()

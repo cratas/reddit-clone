@@ -1,6 +1,6 @@
-import { UserNamePasswordInput } from "./UserNamePasswordInput";
+import { UsernamePasswordInput } from "./UsernamePasswordInput";
 
-export const validateRegister = (options: UserNamePasswordInput) => {
+export const validateRegister = (options: UsernamePasswordInput) => {
   // checking if username has correct format
   if (options.username.length < 5) {
     return {

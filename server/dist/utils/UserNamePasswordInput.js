@@ -9,24 +9,24 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserNamePasswordInput = void 0;
+exports.UsernamePasswordInput = void 0;
 const type_graphql_1 = require("type-graphql");
-let UserNamePasswordInput = class UserNamePasswordInput {
+let UsernamePasswordInput = class UsernamePasswordInput {
 };
 __decorate([
     (0, type_graphql_1.Field)(),
     __metadata("design:type", String)
-], UserNamePasswordInput.prototype, "username", void 0);
+], UsernamePasswordInput.prototype, "username", void 0);
 __decorate([
     (0, type_graphql_1.Field)(),
     __metadata("design:type", String)
-], UserNamePasswordInput.prototype, "email", void 0);
+], UsernamePasswordInput.prototype, "email", void 0);
 __decorate([
     (0, type_graphql_1.Field)(),
     __metadata("design:type", String)
-], UserNamePasswordInput.prototype, "password", void 0);
-UserNamePasswordInput = __decorate([
+], UsernamePasswordInput.prototype, "password", void 0);
+UsernamePasswordInput = __decorate([
     (0, type_graphql_1.InputType)()
-], UserNamePasswordInput);
-exports.UserNamePasswordInput = UserNamePasswordInput;
-//# sourceMappingURL=UserNamePasswordInput.js.map
+], UsernamePasswordInput);
+exports.UsernamePasswordInput = UsernamePasswordInput;
+//# sourceMappingURL=UsernamePasswordInput.js.map
