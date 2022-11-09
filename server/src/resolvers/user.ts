@@ -83,7 +83,7 @@ export class UserResolver {
       };
     }
 
-    User.update(
+    await User.update(
       { id: userIdNum },
       { password: await argon2.hash(newPassword) }
     );
@@ -138,20 +138,19 @@ export class UserResolver {
 
   @Mutation(() => UserResponse)
   async register(
-    @Arg("options") options: UsernamePasswordInput, // options passed as objects created on top
+    @Arg("options") options: UsernamePasswordInput,
     @Ctx() { req }: MyContext
   ): Promise<UserResponse> {
-    // validation of input
-    const response = validateRegister(options);
-    if (response) {
-      return response;
+    const errors = validateRegister(options);
+    
+    if (errors) {
+      return { errors };
     }
 
-    const hashedPassword = await argon2.hash(options.password); // creating new hash key by argon2 hashing alg
-
+    const hashedPassword = await argon2.hash(options.password);
     let user;
-
     try {
+      // User.create({}).save()
       const result = await ormConnection
         .createQueryBuilder()
         .insert()
@@ -161,26 +160,27 @@ export class UserResolver {
           email: options.email,
           password: hashedPassword,
         })
-        .returning("*");
-      console.log("result: ", result);
-      user = result;
+        .returning("*")
+        .execute();
+      user = result.raw[0];
     } catch (err) {
-      user = 5 as any;
-      console.log("err: ", err);
-      // if username is duplicated
-      if (err.code === "23505" || err.detail.includes("already exists")) {
+      //|| err.detail.includes("already exists")) {
+      // duplicate username error
+      if (err.code === "23505") {
         return {
           errors: [
             {
               field: "username",
-              message: "Username already taken.",
+              message: "username already taken",
             },
           ],
         };
       }
     }
 
-    // store user id session and log in user
+    // store user id session
+    // this will set a cookie on the user
+    // keep them logged in
     req.session.userId = user.id;
 
     return { user };

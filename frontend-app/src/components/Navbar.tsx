@@ -37,7 +37,7 @@ export const Navbar: React.FC<NavbarProps> = ({}) => {
     // user is logged in
     body = (
       <Flex justifyContent={"right"}>
-        <Box mr={5}>{data.me.userName}</Box>
+        <Box mr={5}>{data.me.username}</Box>
         <Button onClick={() => logout()} isLoading={fetchingLogout} variant="link">
           Logout
         </Button>

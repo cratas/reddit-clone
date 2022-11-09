@@ -30,9 +30,8 @@ export const ormConnection = new DataSource({
 
 const main = async () => {
 
+  // init type orm connection
   ormConnection.initialize();
-
-  // await orm.em.nativeInsert(Post, {title: 'nevim', createdAt: new Date(), updatedAt: new Date()})
 
   const app = express();
 

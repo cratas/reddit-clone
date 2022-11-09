@@ -97,7 +97,7 @@ let UserResolver = class UserResolver {
                     ],
                 };
             }
-            User_1.User.update({ id: userIdNum }, { password: yield argon2_1.default.hash(newPassword) });
+            yield User_1.User.update({ id: userIdNum }, { password: yield argon2_1.default.hash(newPassword) });
             yield redis.del(key);
             req.session.userId = user.id;
             return { user };
@@ -123,9 +123,9 @@ let UserResolver = class UserResolver {
     }
     register(options, { req }) {
         return __awaiter(this, void 0, void 0, function* () {
-            const response = (0, validateRegister_1.validateRegister)(options);
-            if (response) {
-                return response;
+            const errors = (0, validateRegister_1.validateRegister)(options);
+            if (errors) {
+                return { errors };
             }
             const hashedPassword = yield argon2_1.default.hash(options.password);
             let user;
@@ -139,19 +139,17 @@ let UserResolver = class UserResolver {
                     email: options.email,
                     password: hashedPassword,
                 })
-                    .returning("*");
-                console.log("result: ", result);
-                user = result;
+                    .returning("*")
+                    .execute();
+                user = result.raw[0];
             }
             catch (err) {
-                user = 5;
-                console.log("err: ", err);
-                if (err.code === "23505" || err.detail.includes("already exists")) {
+                if (err.code === "23505") {
                     return {
                         errors: [
                             {
                                 field: "username",
-                                message: "Username already taken.",
+                                message: "username already taken",
                             },
                         ],
                     };

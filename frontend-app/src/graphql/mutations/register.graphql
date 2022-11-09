@@ -1,5 +1,5 @@
 # gotta yarn gen for generating code into generated/graphql.tsx
-mutation Register($options: UserNamePasswordInput!) {
+mutation Register($options: UsernamePasswordInput!) {
   register(options: $options) {
     ...RegularUserResponse
   }
