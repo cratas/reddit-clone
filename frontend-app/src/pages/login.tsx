@@ -10,8 +10,6 @@ import { withUrqlClient } from "next-urql";
 import { createUrqlClient } from "../utils/createUrqlClient";
 import NextLink from "next/link";
 
-interface registerProps {}
-
 const Login: React.FC<{}> = () => {
   const router = useRouter();
   const [, login] = useLoginMutation();
@@ -28,7 +26,9 @@ const Login: React.FC<{}> = () => {
             setErrors(toErrorMap(response.data.login.errors)); // parsing data into map using toErrorMap util function
           } else if (response.data?.login.user) {
             // worked
-            router.push("/");
+            router.push(
+              typeof router.query.next === "string" ? router.query.next : "/"
+            );
           }
         }}
       >

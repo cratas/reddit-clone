@@ -10,15 +10,17 @@ interface NavbarProps {}
 const style: CSSObject = {
   backgroundColor: "tomato",
   textAlign: "right",
+  position: "sticky",
+  top: "0",
+  zIndex: 10000,
 };
 
-export const Navbar: React.FC<NavbarProps> = ({}) => {
-  const [{fetching: fetchingLogout}, logout] = useLogoutMutation();
+export const NavBar: React.FC<NavbarProps> = ({}) => {
+  const [{ fetching: fetchingLogout }, logout] = useLogoutMutation();
   const [{ data, fetching }] = useMeQuery({
-    pause: isServer() // for this component we use server side rendering, but this query shouldn't be executed on server
+    pause: isServer(), // for this component we use server side rendering, but this query shouldn't be executed on server
   });
 
-  
   let body = null;
 
   if (!data?.me) {
@@ -38,7 +40,11 @@ export const Navbar: React.FC<NavbarProps> = ({}) => {
     body = (
       <Flex justifyContent={"right"}>
         <Box mr={5}>{data.me.username}</Box>
-        <Button onClick={() => logout()} isLoading={fetchingLogout} variant="link">
+        <Button
+          onClick={() => logout()}
+          isLoading={fetchingLogout}
+          variant="link"
+        >
           Logout
         </Button>
       </Flex>
