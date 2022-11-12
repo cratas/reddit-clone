@@ -1,10 +1,11 @@
 # gotta yarn gen for generating code into generated/graphql.tsx
 
-query Posts {
-    posts {
-        id
-        createdAt
-        updatedAt
-        title
-    }
+query Posts($limit: Int!, $cursor: String) {
+  posts(cursor: $cursor, limit: $limit) {
+    id
+    createdAt
+    updatedAt
+    title
+    textSnippet
+  }
 }

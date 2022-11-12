@@ -1,4 +1,9 @@
-import { dedupExchange, Exchange, fetchExchange } from "urql";
+import {
+  dedupExchange,
+  Exchange,
+  fetchExchange,
+  stringifyVariables,
+} from "urql";
 import { cacheExchange } from "@urql/exchange-graphcache";
 import {
   MeDocument,
@@ -10,6 +15,7 @@ import {
 import { betterUpdateQuery } from "./betterUpdateQuery";
 import { pipe, tap } from "wonka";
 import Router from "next/router";
+import { Resolver } from "@urql/exchange-graphcache";
 
 const errorExchange: Exchange =
   ({ forward }) =>
@@ -25,6 +31,35 @@ const errorExchange: Exchange =
     );
   };
 
+
+// function which handle combining data from the server and from cache
+const cursorPagination = (): Resolver => {
+  return (_parent, fieldArgs, cache, info) => {
+    const { parentKey: entityKey, fieldName } = info;
+
+    const allFields = cache.inspectFields(entityKey); // return all api calls which are saved in cache
+
+    const fieldInfos = allFields.filter((info) => info.fieldName === fieldName); // filtering cache by query name -> posts
+    const size = fieldInfos.length;
+
+    if (size === 0) {
+      return undefined;
+    }
+
+    const fieldKey = `${fieldName}(${stringifyVariables(fieldArgs)})`;
+    const isItInTheCachce = cache.resolve(entityKey, fieldKey);
+    info.partial = !isItInTheCachce;
+
+    const results: string[] = [];
+    fieldInfos.forEach((fi) => {
+      const data = cache.resolve(entityKey, fi.fieldKey) as string[];
+      results.push(...data);
+    });
+
+    return results;
+  };
+};
+
 export const createUrqlClient = (ssrExchange: any) => ({
   url: "http://localhost:4000/graphql",
   fetchOptions: {
@@ -33,6 +68,11 @@ export const createUrqlClient = (ssrExchange: any) => ({
   exchanges: [
     dedupExchange,
     cacheExchange({
+      resolvers: {
+        Query: {
+          posts: cursorPagination(), // gotta match posts query from graphql
+        },
+      },
       // operations which will update cash memory
       // for example: If user log out, u wanna recall me query, to rerender ui
       updates: {
