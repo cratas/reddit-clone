@@ -17,6 +17,7 @@ import session from "express-session";
 import connectRedis from "connect-redis";
 import { Post } from "./entities/Post";
 import { User } from "./entities/User";
+import { Updoot } from "./entities/Updoot";
 
 export const ormConnection = new DataSource({
   type: "postgres",
@@ -25,7 +26,7 @@ export const ormConnection = new DataSource({
   password: "Admin123",
   logging: true,
   synchronize: true,
-  entities: [Post, User],
+  entities: [Post, User, Updoot],
 });
 
 const main = async () => {

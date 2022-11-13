@@ -28,6 +28,7 @@ const express_session_1 = __importDefault(require("express-session"));
 const connect_redis_1 = __importDefault(require("connect-redis"));
 const Post_1 = require("./entities/Post");
 const User_1 = require("./entities/User");
+const Updoot_1 = require("./entities/Updoot");
 exports.ormConnection = new typeorm_1.DataSource({
     type: "postgres",
     database: "redditv2",
@@ -35,7 +36,7 @@ exports.ormConnection = new typeorm_1.DataSource({
     password: "Admin123",
     logging: true,
     synchronize: true,
-    entities: [Post_1.Post, User_1.User],
+    entities: [Post_1.Post, User_1.User, Updoot_1.Updoot],
 });
 const main = () => __awaiter(void 0, void 0, void 0, function* () {
     exports.ormConnection.initialize();
