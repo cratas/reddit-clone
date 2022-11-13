@@ -51,23 +51,76 @@ export class PostResolver {
   ) {
     const isUpdoot = value !== -1;
     const realValue = isUpdoot ? 1 : -1;
-
     const { userId } = req.session;
 
-    await Updoot.insert({
-      userId,
-      postId,
-      value: realValue,
-    });
+    const updoot = await Updoot.findOne({ where: { postId, userId } });
 
-    await ormConnection.query(
-      `
+    // the user has voted on the post before
+    // and they are changin their vote
+    if (updoot && updoot.value !== realValue) {
+      await ormConnection.transaction(async (tm) => {
+        await tm.query(
+          `
+        update updoot
+        set value = $1
+        where "postId" = $2 and "userId" = $3;
+        `,
+          [realValue, postId, userId]
+        );
+
+        await tm.query(
+          `
+          update post
+          set points = points + $1
+          where id = $2;
+        `,
+          [2 * realValue, postId]
+        );
+      });
+    } else if (!updoot) {
+      // has never voted before
+      await ormConnection.transaction(async (tm) => {
+        await tm.query(
+          `
+        insert into updoot ("userId", "postId", value)
+        values ($1, $2, $3);
+        `,
+          [userId, postId, realValue]
+        );
+
+        await tm.query(
+          `
         update post
-        set p.points = p.points + $1
-        where p.id = $2
-      `,
-      [realValue, postId]
-    );
+        set points = points + $1
+        where id = $2;
+        `,
+          [realValue, postId]
+        );
+      });
+    }
+
+    // await Updoot.insert({
+    //   userId,
+    //   postId,
+    //   value: realValue,
+    // });
+
+    // creating transaction, when one of partial commands in transaction fails -> rollback
+
+    // await ormConnection.query(
+    //   `
+    //   START TRANSACTION;
+
+    //     insert into updoot ("userId", "postId", value)
+    //     values (${userId}, ${postId}, ${realValue});
+
+    //     update post
+    //     set points = points + ${realValue}
+    //     where id = ${postId};
+
+    //     COMMIT;
+    //   `
+    // );
 
     return true;
   }
@@ -90,36 +143,22 @@ export class PostResolver {
 
     const posts = await ormConnection.query(
       `
-    select p.*, 
-    u.username
+    select p.*,
     json_build_object(
       'id', u.id,
       'username', u.username,
       'email', u.email,
+      'createdAt', u."createdAt",
+      'updatedAt', u."updatedAt"
       ) creator
     from post p
-    inner join public.user u on u.id = p."creatorI"
+    inner join public.user u on u.id = p."creatorId"
     ${cursor ? `where p."createdAt" < $2` : ""}
     order by p."createdAt" DESC
     limit $1
     `,
       replacements
     );
-
-    // const qb = ormConnection
-    //   .getRepository(Post)
-    //   .createQueryBuilder("p")
-    //   .innerJoinAndSelect("p.creator", "u", 'u.id = p."creatorId"')
-    //   .orderBy('p."createdAt"', "DESC")
-    //   .take(reaLimitPlusOne);
-
-    // if (cursor) {
-    //   qb.where('"p.createdAt" < :cursor', { cursor: new Date(parseInt(cursor)) });
-    // }
-
-    // const posts = await qb.getMany();
-
-    console.log(posts);
 
     return {
       posts: posts.slice(0, realLimit),
