@@ -17,10 +17,12 @@ import {
 
 const Index = () => {
   const [variables, setVariables] = useState({
-    limit: 10,
+    limit: 2,
     cursor: null as null | string,
   });
-  const [{ data, fetching }] = usePostsQuery({ variables: { limit: 5 } });
+
+
+  const [{ data, fetching }] = usePostsQuery({ variables });
 
   if (!fetching && !data) {
     return <div>You got qquery failed for some reason</div>;
@@ -55,8 +57,6 @@ const Index = () => {
                 limit: variables.limit,
                 cursor: data.posts[data.posts.length - 1].createdAt,
               });
-
-              console.log(variables)
             }}
             isLoading={fetching}
             my={5}
