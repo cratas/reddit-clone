@@ -1,4 +1,4 @@
-import { ObjectType, Field } from "type-graphql";
+import { ObjectType, Field, Int } from "type-graphql";
 import {
   Entity,
   Column,
@@ -35,6 +35,9 @@ export class Post extends BaseEntity {
   @Field()
   @Column()
   creatorId: number;
+
+  @Field(() => Int, { nullable: true })
+  voteStatus: number | null; // 1 or -1 or null (if values is 1 or -1, user has voted, if null user has not voted yet)
 
   // foreign key to user ??
   @Field()

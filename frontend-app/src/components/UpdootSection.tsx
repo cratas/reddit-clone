@@ -1,14 +1,20 @@
-import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
-import { Flex, Box, Heading, Text, IconButton } from "@chakra-ui/react";
+import { ChevronDownIcon, ChevronUpIcon, DeleteIcon } from "@chakra-ui/icons";
+import { Flex, Box, Heading, Text, IconButton, Link } from "@chakra-ui/react";
 import React from "react";
-import { PostSnippetFragment, useVoteMutation } from "../generated/graphql";
+import {
+  PostSnippetFragment,
+  useDeletePostMutation,
+  useVoteMutation,
+} from "../generated/graphql";
+import NextLink from "next/link";
 
 interface UpdootSectionProps {
   post: PostSnippetFragment;
 }
 
 const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
-  const [{ fetching, operation }, vote] = useVoteMutation();
+  const [{ fetching }, vote] = useVoteMutation();
+  const [, deletePost] = useDeletePostMutation();
 
   return (
     <Flex key={post.id} p={5} shadow="md" borderWidth="1px">
@@ -19,6 +25,9 @@ const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
       >
         <IconButton
           onClick={() => {
+            if (post.voteStatus === 1) {
+              return;
+            }
             vote({ postId: post.id, value: 1 });
           }}
           isLoading={fetching}
@@ -26,10 +35,14 @@ const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
           aria-label="chevron up"
           h={10}
           icon={<ChevronUpIcon />}
+          backgroundColor={post.voteStatus === 1 ? "green" : undefined}
         />
         {post.points}
         <IconButton
           onClick={() => {
+            if (post.voteStatus === -1) {
+              return;
+            }
             vote({ postId: post.id, value: -1 });
           }}
           isLoading={fetching}
@@ -37,12 +50,26 @@ const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
           w={10}
           h={10}
           icon={<ChevronDownIcon />}
+          backgroundColor={post.voteStatus === -1 ? "red" : undefined}
         />
       </Flex>
       <Box ml={5}>
-        <Heading fontSize="xl">{post.title}</Heading>
+        <NextLink href="/post/[id]" as={`/post/${post.id}`}>
+          <Link>
+            <Heading fontSize="xl">{post.title}</Heading>
+          </Link>
+        </NextLink>
         <Text>{"Posted by: " + post.creator.username}</Text>
         <Text mt={4}>{post.textSnippet}</Text>
+      </Box>
+      <Box ml="auto">
+        <IconButton
+          icon={<DeleteIcon />}
+          aria-label="delete post"
+          onClick={() => {
+            deletePost({ id: post.id });
+          }}
+        />
       </Box>
     </Flex>
   );

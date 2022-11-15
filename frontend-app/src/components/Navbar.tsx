@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Link } from "@chakra-ui/react";
+import { Box, Button, Flex, Heading, Link } from "@chakra-ui/react";
 import { CSSObject } from "@emotion/react";
 import React from "react";
 import NextLink from "next/link";
@@ -6,14 +6,6 @@ import { useLogoutMutation, useMeQuery } from "../generated/graphql";
 import { isServer } from "../utils/isServer";
 
 interface NavbarProps {}
-
-const style: CSSObject = {
-  backgroundColor: "tomato",
-  textAlign: "right",
-  position: "sticky",
-  top: "0",
-  zIndex: 10000,
-};
 
 export const NavBar: React.FC<NavbarProps> = ({}) => {
   const [{ fetching: fetchingLogout }, logout] = useLogoutMutation();
@@ -52,7 +44,12 @@ export const NavBar: React.FC<NavbarProps> = ({}) => {
   }
 
   return (
-    <Flex __css={style} p={5}>
+    <Flex p={5} align="center" backgroundColor={"tomato"}>
+      <NextLink href="/">
+        <Link>
+          <Heading>LiReddit</Heading>
+        </Link>
+      </NextLink>
       <Box ml={"auto"}>{body}</Box>
     </Flex>
   );

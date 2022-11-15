@@ -33,9 +33,10 @@ const Index = () => {
   return (
     <Layout>
       <Flex align="center">
-        <Heading>LiReddit</Heading>
         <NextLink href="/create-post">
-          <Link ml="auto">create post</Link>
+          <Link ml="auto" as={Button}>
+            create post
+          </Link>
         </NextLink>
       </Flex>
       <br />
@@ -43,9 +44,9 @@ const Index = () => {
         <div>loading...</div>
       ) : (
         <Stack spacing={8}>
-          {data!.posts.posts.map((p, key) => (
-            <UpdootSection post={p} key={key}/>
-          ))}
+          {data!.posts.posts.map((p, key) =>
+            !p ? null : <UpdootSection post={p} key={key} />
+          )}
         </Stack>
       )}
       {data && data.posts.hasMore ? (
