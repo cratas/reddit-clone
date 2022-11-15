@@ -1,9 +1,15 @@
-import { ChevronDownIcon, ChevronUpIcon, DeleteIcon } from "@chakra-ui/icons";
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  DeleteIcon,
+  EditIcon,
+} from "@chakra-ui/icons";
 import { Flex, Box, Heading, Text, IconButton, Link } from "@chakra-ui/react";
 import React from "react";
 import {
   PostSnippetFragment,
   useDeletePostMutation,
+  useMeQuery,
   useVoteMutation,
 } from "../generated/graphql";
 import NextLink from "next/link";
@@ -15,6 +21,7 @@ interface UpdootSectionProps {
 const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
   const [{ fetching }, vote] = useVoteMutation();
   const [, deletePost] = useDeletePostMutation();
+  const [{ data: meData }] = useMeQuery();
 
   return (
     <Flex key={post.id} p={5} shadow="md" borderWidth="1px">
@@ -62,15 +69,28 @@ const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
         <Text>{"Posted by: " + post.creator.username}</Text>
         <Text mt={4}>{post.textSnippet}</Text>
       </Box>
-      <Box ml="auto">
-        <IconButton
-          icon={<DeleteIcon />}
-          aria-label="delete post"
-          onClick={() => {
-            deletePost({ id: post.id });
-          }}
-        />
-      </Box>
+      {meData?.me?.id === post.creator.id ? (
+        <Box ml="auto">
+          <NextLink href="/post/edit/[id]" as={`/post/edit/${post.id}`}>
+            <IconButton
+              icon={<EditIcon />}
+              aria-label="edit post"
+              onClick={() => {
+                // deletePost({ id: post.id });
+              }}
+              mr={2}
+            />
+          </NextLink>
+          <IconButton
+            icon={<DeleteIcon />}
+            aria-label="delete post"
+            onClick={() => {
+              deletePost({ id: post.id });
+            }}
+            backgroundColor="red"
+          />
+        </Box>
+      ) : null}
     </Flex>
   );
 };
