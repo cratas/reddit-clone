@@ -29,6 +29,8 @@ const connect_redis_1 = __importDefault(require("connect-redis"));
 const Post_1 = require("./entities/Post");
 const User_1 = require("./entities/User");
 const Updoot_1 = require("./entities/Updoot");
+const createUserLoader_1 = require("./utils/createUserLoader");
+const createUpdootLoader_1 = require("./utils/createUpdootLoader");
 exports.ormConnection = new typeorm_1.DataSource({
     type: "postgres",
     database: "redditv2",
@@ -69,7 +71,13 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
             resolvers: [hello_1.HelloResolver, post_1.PostResolver, user_1.UserResolver],
             validate: false,
         }),
-        context: ({ req, res }) => ({ req, res, redis }),
+        context: ({ req, res }) => ({
+            req,
+            res,
+            redis,
+            userLoader: (0, createUserLoader_1.createUserLoader)(),
+            updootLoader: (0, createUpdootLoader_1.createUpdootLoader)(),
+        }),
     });
     yield apolloServer.start();
     apolloServer.applyMiddleware({

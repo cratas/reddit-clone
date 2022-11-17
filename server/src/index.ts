@@ -18,6 +18,8 @@ import connectRedis from "connect-redis";
 import { Post } from "./entities/Post";
 import { User } from "./entities/User";
 import { Updoot } from "./entities/Updoot";
+import { createUserLoader } from "./utils/createUserLoader";
+import { createUpdootLoader } from "./utils/createUpdootLoader";
 
 export const ormConnection = new DataSource({
   type: "postgres",
@@ -30,7 +32,6 @@ export const ormConnection = new DataSource({
 });
 
 const main = async () => {
-
   // init type orm connection
   ormConnection.initialize();
 
@@ -73,7 +74,13 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-    context: ({ req, res }) => ({ req, res, redis }), // passing objects, something like props
+    context: ({ req, res }) => ({
+      req,
+      res,
+      redis,
+      userLoader: createUserLoader(),
+      updootLoader: createUpdootLoader(),
+    }), // passing objects, something like props
   });
 
   // startin' graphQL server

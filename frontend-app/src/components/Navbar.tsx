@@ -4,10 +4,12 @@ import React from "react";
 import NextLink from "next/link";
 import { useLogoutMutation, useMeQuery } from "../generated/graphql";
 import { isServer } from "../utils/isServer";
+import { useRouter } from "next/router";
 
 interface NavbarProps {}
 
 export const NavBar: React.FC<NavbarProps> = ({}) => {
+  const router = useRouter();
   const [{ fetching: fetchingLogout }, logout] = useLogoutMutation();
   const [{ data, fetching }] = useMeQuery({
     pause: isServer(), // for this component we use server side rendering, but this query shouldn't be executed on server
@@ -33,7 +35,10 @@ export const NavBar: React.FC<NavbarProps> = ({}) => {
       <Flex justifyContent={"right"}>
         <Box mr={5}>{data.me.username}</Box>
         <Button
-          onClick={() => logout()}
+          onClick={async () => {
+            await logout();
+            router.reload();
+          }}
           isLoading={fetchingLogout}
           variant="link"
         >
